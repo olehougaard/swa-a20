@@ -18,6 +18,7 @@ export default (init_model, view) => {
               view.update(model)
             })
           })
+          .catch(console.log)
         }
         break;
     }

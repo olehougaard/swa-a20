@@ -12,22 +12,12 @@
             border-spacing: 0;
         }
     </style>
-</head>
-<body>
-    <div id='base'>
-        <h1>People</h1>
-        <table id='employees'>
-            <thead><tr><td>Id</td><td>Name</td><td>Employee id</td><td>Salary</td><td>Manager</td></tr></thead>
-            <tbody id='employee_data'></tbody>
-        </table>
-    </div>
-</body>
 <script type = 'module'>
     import model from './model.js'
     import presenter from './presenter_fetch.js'
     import view from './view.js'
     
-    function init() {
+    window.init = function() {
         Promise.all([fetch('http://localhost:9090/persons'), fetch('http://localhost:9090/employees')])
         .then(res => res.map(r => r.json()))
         .then(r => Promise.all(r))
@@ -40,6 +30,15 @@
         })
         .catch(console.error)
     }
-    init()
 </script>
+</head>
+<body onload=init()>
+    <div id='base'>
+        <h1>People</h1>
+        <table id='employees'>
+            <thead><tr><td>Id</td><td>Name</td><td>Employee id</td><td>Salary</td><td>Manager</td></tr></thead>
+            <tbody id='employee_data'></tbody>
+        </table>
+    </div>
+</body>
 </html>

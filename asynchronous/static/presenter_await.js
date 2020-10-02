@@ -7,13 +7,17 @@ export default (init_model, view) => {
         const { id } = params
         const salary = view.prompt('Salary?')
         if (salary) {
-          const headers = { 'Content-Type': 'application/json', Accept: 'application/json' }
-          const employeeResponse = await fetch('http://localhost:9090/employees', { method: 'POST', body: JSON.stringify({salary, manager:false}), headers })
-          const employee = await employeeResponse.json()
-          const personResponse = await fetch('http://localhost:9090/persons/' + id, { method: 'PATCH', body: JSON.stringify(employee), headers })
-          const person = await personResponse.json()
-          model = model.addEmployee(employee).updatePerson(person)
-          view.update(model)
+          try {
+            const headers = { 'Content-Type': 'application/json', Accept: 'application/json' }
+            const employeeResponse = await fetch('http://localhost:9090/employees', { method: 'POST', body: JSON.stringify({salary, manager:false}), headers })
+            const employee = await employeeResponse.json()
+            const personResponse = await fetch('http://localhost:9090/persons/' + id, { method: 'PATCH', body: JSON.stringify(employee), headers })
+            const person = await personResponse.json()
+            model = model.addEmployee(employee).updatePerson(person)
+            view.update(model)
+          } catch (e) {
+            console.log(e)
+          }
         }
         break;
     }
