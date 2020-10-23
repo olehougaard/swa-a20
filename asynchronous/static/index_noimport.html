@@ -1,0 +1,134 @@
+<html>
+<head> 
+    <title>People</title>
+    <style>
+        td {
+            width: 40px;
+            height: 40px;
+            border: 1px solid black;
+        }
+        table {
+            border: 1px solid black;
+            border-spacing: 0;
+        }
+    </style>
+    <script>
+        const model = (persons, employees, filter = () => true) => {
+            const employeeMap = {}
+            employees.forEach(e => employeeMap[e.employeeId] = e)
+
+            const personData = () => persons
+                .map(p => ({ ...p, ...employeeMap[p.employeeId]}))
+                .filter(filter)
+
+            const updatePerson = p => model(persons.map(pp => p.id == pp.id? p : pp), employees, filter)
+            const addEmployee = e => model(persons, employees.concat(e), filter)
+
+            const filtered = filter => model(persons, employees, filter )
+            const all = () => model(persons, employees)
+
+            return { personData, updatePerson, addEmployee, filtered, all }
+        }
+
+        const presenter = (init_model, view) => {
+        let model = init_model
+
+        const onAction = ({type, ...params}) =>  {
+            switch(type) {
+            case 'hire':
+                const { id } = params
+                const salary = view.prompt('Salary?')
+                if (salary) {
+                const request = new XMLHttpRequest()
+                request.open('POST', 'http://localhost:9090/employees')
+                request.setRequestHeader('Content-Type', 'application/json')
+                request.setRequestHeader('Accept', 'application/json')
+                request.send(JSON.stringify({ salary, manager: false }))
+                request.onload = () => {
+                    const employee = JSON.parse(request.responseText)
+                    const { employeeId } = employee
+                    request.open('PATCH', 'http://localhost:9090/persons/' + id)
+                    request.setRequestHeader('Content-Type', 'application/json')
+                    request.setRequestHeader('Accept', 'application/json')
+                    request.send(JSON.stringify({ employeeId }))
+                    request.onload = () => {
+                    const person = JSON.parse(request.responseText)
+                    model = model.addEmployee(employee).updatePerson(person)
+                    view.update(model)
+                    }
+                }
+                }
+                break;
+            }
+        }
+
+        return { onAction }
+        }
+
+        const view = window => {
+            const document = window.document
+            const table_body = document.getElementById('employee_data')
+            const listeners = []
+
+            const listen = l => listeners.push(l)
+
+            const addPerson = p => {
+                const tr = table_body.appendChild(document.createElement('tr'))
+                tr.insertCell().appendChild(document.createTextNode(p.id))
+                tr.insertCell().appendChild(document.createTextNode(p.name))
+                if (p.employeeId) {
+                    tr.insertCell().appendChild(document.createTextNode(p.employeeId))
+                    tr.insertCell().appendChild(document.createTextNode(p.salary || 0))
+                    tr.insertCell().appendChild(document.createTextNode(!!p.manager))
+                } else {
+                    const button = tr.insertCell().appendChild(document.createElement('button'))
+                    button.appendChild(document.createTextNode("Hire"))
+                    button.onclick = () => {
+                        const event = { type: 'hire', id: p.id }
+                        listeners.forEach(l => l(event))
+                    }
+
+                    tr.insertCell()
+                    tr.insertCell()
+                }
+            }
+
+            const update = model => {
+                while(table_body.firstChild) table_body.removeChild(table_body.firstChild)
+                model.personData().forEach(addPerson)
+            }
+            const prompt = window.prompt.bind(window)
+
+            return { addPerson, update, listen, prompt }
+        }
+        
+        window.init = function() {
+            const request = new XMLHttpRequest()
+            request.open('GET', 'http://localhost:9090/persons')
+            request.send()
+            request.onload = () => {
+                const persons = JSON.parse(request.responseText)
+                request.open('GET', 'http://localhost:9090/employees')
+                request.send()
+                request.onload = () => {
+                    const employees = JSON.parse(request.responseText)
+                    const theModel = model(persons, employees)
+                    const theView = view(window)
+                    const thePresenter = presenter(theModel, theView)
+                    theView.listen(thePresenter.onAction)
+                    theView.update(theModel)
+                }
+            }
+        }
+    </script>
+</head>
+<body onload="init()">
+    <div id='base'>
+        <h1>People</h1>
+        <table id='employees'>
+            <thead><tr><td>Id</td><td>Name</td><td>Employee id</td><td>Salary</td><td>Manager</td></tr></thead>
+            <tbody id='employee_data'></tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -5,12 +5,14 @@ const app = express()
 app.use(express.static('static'))
 
 app.use(body_parser.json())
-app.use(function(_, res, next) {
+/*
+app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header("Access-Control-Allow-Methods", "GET, POST, PATCH");
     next();
   });
+*/
 
 const persons = {
     '1': { id: 1, name: 'John Doe' },
@@ -105,4 +107,4 @@ app.post('employees/:id/subordinates', (req, res) => {
     res.send(JSON.stringify(employees[empId]))
 })
 
-app.listen(9090, () => console.log("Server is listening on 9090"))
+app.listen(9999, () => console.log("Server is listening on 9999"))
