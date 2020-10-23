@@ -1,19 +1,19 @@
-function reducer(action, model) {
+function reducer(action, state) {
   switch(action.type) {
     case 'hire':
       const { employee, person } = action
-      return model.addEmployee(employee).updatePerson(person)
+      return state.addEmployee(employee).updatePerson(person)
       
     default:
-      return model
+      return state
   }
 }
 
 export default (init_model, view, renderer) => {
-  let model = init_model
+  let state = init_model
 
   return action => {
-    model = reducer(action, model)
-    renderer(view(model))
+    state = reducer(action, state)
+    renderer(view(state))
   }
 }
