@@ -1,0 +1,28 @@
+<html ng-app='employeeApp'>
+<head> 
+    <title>People</title>
+    <style>
+        td {
+            width: 40px;
+            height: 40px;
+            border: 1px solid black;
+        }
+        table {
+            border: 1px solid black;
+            border-spacing: 0;
+        }
+    </style>
+    <script type = 'module'>
+        import 'https://ajax.googleapis.com/ajax/libs/angularjs/1.6.5/angular.min.js'
+        import './components.js'
+    </script>
+</head>
+<body ng-controller="EmployeeController">
+    <div id='base'>
+        <h1>People</h1>
+        <employee-table id='employees' attribute='persons'>
+        </employee-table>
+        <p>Salary: <input ng-model='model.salary'></p>
+    </div>
+</body>
+</html>
