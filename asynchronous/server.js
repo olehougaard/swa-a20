@@ -1,10 +1,9 @@
 const express = require('express')
-const body_parser = require('body-parser')
 
 const app = express()
 app.use(express.static('static'))
 
-app.use(body_parser.json())
+app.use(express.json())
 app.use(function(_, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
